@@ -1,6 +1,5 @@
-# mysql-parse
-1.用于生成单表的增删改查mybatis相关文件
-2.用于生成关联表的查询
+# demo-websocket
+用于测试web-socket的功能
 
 #使用
-访问juan/vue/index
+访问http://localhost:8084/index.html
