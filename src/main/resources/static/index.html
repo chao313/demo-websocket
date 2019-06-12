@@ -27,7 +27,7 @@
                 stompClient = Stomp.over(socket);
                 stompClient.connect({}, function (frame) {
                     // 注册发送消息
-                    stompClient.subscribe('/topic/send', function (msg) {
+                    stompClient.subscribe('/topic/serverSendToClient', function (msg) {
                         $scope.data.rows.push(JSON.parse(msg.body));
                         $scope.data.connected = true;
                         $scope.$apply();
@@ -52,7 +52,7 @@
             }
 
             $scope.send = function () {
-                stompClient.send("/app/send", {}, JSON.stringify({
+                stompClient.send("/app/clientSendToServer", {}, JSON.stringify({
                     'message': $scope.data.message
                 }));
             }

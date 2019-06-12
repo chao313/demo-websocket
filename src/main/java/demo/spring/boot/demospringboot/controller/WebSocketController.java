@@ -7,7 +7,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -23,16 +23,51 @@ public class WebSocketController {
         return "index";
     }
 
+
     /**
-     * 通过http -> 模拟服务器端向前端发送数据
-     *
-     * @param message
-     * @return
-     * @throws Exception
+     * client 使用http向指定主题推送消息 + 使用 messagingTemplate 由 server 向客户端推送消息
      */
-    @MessageMapping("/send")
-    @SendTo("/topic/send")
-    public SocketMessage send(SocketMessage message) throws Exception {
+    @RequestMapping("/httpSendToServer")
+    @ResponseBody
+    public String httpSendToServer(@RequestParam(value = "msg") String msg) {
+        SocketMessage message = new SocketMessage();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        message.date = msg + " : " + df.format(new Date());
+        messagingTemplate.convertAndSend("/topic/serverSendToClient", message);
+        return msg + "使用http发送消息成功";
+    }
+
+    /**
+     * socketClient -> SendToServer
+     * 方式1：利用 messagingTemplate 向指定主题推送消息
+     *
+     * @MessageMapping("/sendToServer") 和 stompClient.send（）对应
+     * ->向地址为"/sendToServer"的服务器进行消息发送
+     */
+    @MessageMapping("/clientSendToServer2")
+    public void clientSendToServer(SocketMessage message) {
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        message.date = df.format(new Date());
+        messagingTemplate.convertAndSend("/topic/serverSendToClient", message);
+    }
+
+
+    /**
+     * socketServer -> SendToClient
+     * <p>
+     * 方式2：使用 @SendTo 替代 messagingTemplate
+     * <p>
+     *
+     * <p>
+     * socket客户端发送消息到服务端
+     * <p>
+     *
+     * @SendTo("/topic/sendToClient") 和 stompClient.subscribe（）对应
+     * ->向订阅了为"/topic/serverSendToClient"的client进行消息发送
+     */
+    @MessageMapping("/clientSendToServer")
+    @SendTo("/topic/serverSendToClient")
+    public SocketMessage serverSendToClient(SocketMessage message) {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         message.date = df.format(new Date());
         return message;
