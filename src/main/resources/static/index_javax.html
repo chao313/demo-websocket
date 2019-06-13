@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocketDemoV1</title>
+
+</head>
+<script>
+    var websocketClient = null;
+
+    function showMessage(data) {
+        var div = document.getElementById("showMsg");
+        div.innerHTML = div.innerHTML + data + "：" + new Date().toLocaleString() + "<br />"
+    };
+
+    /* 创建一个方法,用来连接我们的websocket服务 */
+    function connection(url) {
+        // 创建websocket对象
+        if ('WebSocket' in window) {
+            websocketClient = new WebSocket(url);
+            console.info(websocketClient);
+        } else {
+            alert('Not support websocket')
+        }
+        websocketClient.onopen = function () {
+            console.info("连接建立")
+        }
+        // 接收到消息的回调方法
+        websocketClient.onmessage = function (event) {
+            console.info("接收到服务器的消息:" + event.data);
+            showMessage(event.data);
+        }
+    };
+
+    function sendMsg() {
+        websocketClient.send($("#msg").val());
+    }
+</script>
+<body>
+<a href="javascript:connection('ws://localhost:8084/ws/websocket')">建立连接</a>
+<br/>
+<input type="text" id="msg"/>
+<a href="javascript:sendMsg()">发送消息</a>
+<br/>
+<div id="showMsg"></div>
+<!-- 在线引入jQuery -->
+<script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+</body>
+</html>

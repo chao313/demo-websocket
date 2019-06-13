@@ -1,4 +1,4 @@
-package demo.spring.boot.demospringboot.vo;
+package demo.spring.boot.demospringboot.config.wesocket.spring;
 
 public class SocketMessage {
 

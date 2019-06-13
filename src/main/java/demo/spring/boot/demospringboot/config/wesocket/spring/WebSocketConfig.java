@@ -1,4 +1,4 @@
-package demo.spring.boot.demospringboot.config;
+package demo.spring.boot.demospringboot.config.wesocket.spring;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

@@ -1,6 +1,5 @@
-package demo.spring.boot.demospringboot.controller;
+package demo.spring.boot.demospringboot.config.wesocket.spring;
 
-import demo.spring.boot.demospringboot.vo.SocketMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -9,12 +8,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Controller
-public class WebSocketController {
+public class WebSocketSpringController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
