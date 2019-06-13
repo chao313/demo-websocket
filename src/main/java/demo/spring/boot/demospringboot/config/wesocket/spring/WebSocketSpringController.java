@@ -7,14 +7,21 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.socket.WebSocketSession;
 
+import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @Controller
 public class WebSocketSpringController {
+
+    @Autowired
+    private HttpSession session;
+
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
@@ -87,4 +94,24 @@ public class WebSocketSpringController {
         messagingTemplate.convertAndSend("/topic/callback", df.format(new Date()));
         return "callback";
     }
+
+
+    /**
+     * client 使用http向指定主题推送消息 + 使用 messagingTemplate 由 server 向客户端推送消息
+     * <p>
+     * + 向指定用户推送消息
+     */
+    @MessageMapping("/httpSendToServerToClientUser")
+    public String httpSendToServerToClientUser(@RequestParam(value = "msg") String msg) {
+        for (WebSocketSession socketSession : MyWebSocketHandlerDecorator.getWebSocketSets()) {
+            HttpSession httpSession = (HttpSession) socketSession.getAttributes().get((MyHandlerShareInterceptor.HTTP_SESSION));
+            SocketMessage message = new SocketMessage();
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            message.date = msg + " : " + df.format(new Date());
+            messagingTemplate.convertAndSendToUser(socketSession.getPrincipal().getName(), "/topic/httpSendToServerToClientUser", message);
+        }
+
+        return msg + "使用http发送消息成功";
+    }
+
 }

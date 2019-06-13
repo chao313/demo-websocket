@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <titlewebsocket</title>
+    <title>websocket</title>
     <script src="//cdn.bootcss.com/angular.js/1.5.6/angular.min.js"></script>
-    <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
+    <script src="https://cdn.bootcss.com/sockjs-client/1.1.0/sockjs.min.js"></script>
     <script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
     <script type="text/javascript">
         /*<![CDATA[*/
@@ -26,12 +26,14 @@
                 var socket = new SockJS('/my-websocket');
                 stompClient = Stomp.over(socket);
                 stompClient.connect({}, function (frame) {
+
                     // 注册发送消息
-                    stompClient.subscribe('/topic/serverSendToClient', function (msg) {
+                    stompClient.subscribe('/user/topic/httpSendToServerToClientUser', function (msg) {
                         $scope.data.rows.push(JSON.parse(msg.body));
                         $scope.data.connected = true;
                         $scope.$apply();
                     });
+
                     // 注册推送时间回调
                     stompClient.subscribe('/topic/callback', function (r) {
                         $scope.data.time = '当前服务器时间：' + r.body;
@@ -42,6 +44,7 @@
                     $scope.data.connected = true;
                     $scope.$apply();
                 });
+
             };
 
             $scope.disconnect = function () {
@@ -52,7 +55,7 @@
             }
 
             $scope.send = function () {
-                stompClient.send("/app/clientSendToServer", {}, JSON.stringify({
+                stompClient.send("/app/httpSendToServerToClientUser", {}, JSON.stringify({
                     'message': $scope.data.message
                 }));
             }

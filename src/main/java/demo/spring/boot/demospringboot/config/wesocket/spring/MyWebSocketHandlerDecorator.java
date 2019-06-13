@@ -8,17 +8,31 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+/**
+ * 用来管理WebSocket的会话
+ */
 public class MyWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-    //在线用户列表
+    /**
+     * 当前用户
+     */
     /*每个浏览器连接都会有一个新的会话对象*/
     private WebSocketSession session;
-    /*用来存储每个会话的session,静态的不会被实例化*/
-    private static CopyOnWriteArraySet<MyWebSocketHandlerDecorator> webSocketSets = new CopyOnWriteArraySet<>();
 
+    /**
+     * !!!!!这个处理器存在的意义就是管理Session
+     * 用来存储每个会话的session,静态的不会被实例化
+     */
+    private static List<WebSocketSession> webSocketSets = Collections.synchronizedList(new ArrayList<>());
+
+    public static List<WebSocketSession> getWebSocketSets() {
+        return webSocketSets;
+    }
 
     public MyWebSocketHandlerDecorator(WebSocketHandler delegate) {
         super(delegate);
@@ -27,14 +41,15 @@ public class MyWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         this.session = session;
-        webSocketSets.add(this);
+        webSocketSets.add(session);
         log.info("建立连接");
         super.afterConnectionEstablished(session);
     }
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        log.info("#消息#:{}", session);
+//        log.info("#消息#:{}", session);
+
         super.handleMessage(session, message);
     }
 
@@ -43,14 +58,14 @@ public class MyWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
         if (session.isOpen()) {
             session.close();
         }
+        webSocketSets.remove(session);
         super.handleTransportError(session, exception);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-//        String uid = session.getUri().toString().split("uid=")[1];
-//        webSocketUsers.remove(uid);
         session.close(closeStatus);
+        webSocketSets.remove(session);
         super.afterConnectionClosed(session, closeStatus);
     }
 }
